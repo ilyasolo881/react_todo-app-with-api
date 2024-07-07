@@ -51,7 +51,7 @@ export const Header: React.FC<Props> = ({
 
   return (
     <header className="todoapp__header">
-      {todos.length > 0 && (
+      {!!todos.length && (
         <button
           type="button"
           className={`todoapp__toggle-all ${todos.every(todo => todo.completed) ? 'active' : ''}`}
@@ -60,7 +60,7 @@ export const Header: React.FC<Props> = ({
         />
       )}
 
-      {todos.length > 0 && (
+      {!!todos.length && (
         <button
           type="button"
           className={`todoapp__toggle-all ${todos.every(todo => todo.completed) ? 'active' : ''}`}

@@ -1,6 +1,6 @@
 import { Todo } from '../types/Todo';
 import { client } from '../utils/fetchClient';
-///ilya@mail.com ilya
+
 export const USER_ID = 693;
 
 export const getTodos = () => {

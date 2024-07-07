@@ -4,6 +4,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { UserWarning } from './UserWarning';
 import { Todo } from './types/Todo';
 import { Status } from './types/Status';
+import { ErrorMessages } from './types/ErrorMessages';
+import { getVisibleToDos } from './utils/getVisibleToDos';
 import { Header } from './components/Header/Header';
 import { ToDoList } from './components/ToDoList/ToDoList';
 import { Error } from './components/Error/Error';
@@ -15,20 +17,15 @@ import { createTodo } from './api/todos';
 import { deleteTodo } from './api/todos';
 import { updateToDo } from './api/todos';
 
-function getVisibleToDos(newTodos: Todo[], newStatus: Status) {
-  switch (newStatus) {
-    case Status.Active:
-      return newTodos.filter(todo => !todo.completed);
-
-    case Status.Completed:
-      return newTodos.filter(todo => todo.completed);
-
-    default:
-      return newTodos;
-  }
-}
-
 export const App: React.FC = () => {
+  const ERRORS: ErrorMessages = {
+    LOAD_TODOS: 'Unable to load todos',
+    TITLE_EMPTY: 'Title should not be empty',
+    ADD_TODO: 'Unable to add a todo',
+    DELETE_TODO: 'Unable to delete a todo',
+    UPDATE_TODO: 'Unable to update a todo',
+  };
+
   const [todos, setTodos] = useState<Todo[]>([]);
   const [error, setError] = useState('');
   const [status, setStatus] = useState(Status.All);
@@ -41,9 +38,9 @@ export const App: React.FC = () => {
     getTodos()
       .then(setTodos)
       .catch(() => {
-        setError('Unable to load todos');
+        setError(ERRORS.LOAD_TODOS);
       });
-  }, []);
+  }, [ERRORS.LOAD_TODOS]);
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
@@ -64,7 +61,7 @@ export const App: React.FC = () => {
     const newTitle = toDoTitle.trim();
 
     if (!newTitle) {
-      setError('Title should not be empty');
+      setError(ERRORS.TITLE_EMPTY);
 
       return;
     }
@@ -80,7 +77,7 @@ export const App: React.FC = () => {
         setTodos([...todos, resultTodo]);
         setTitle('');
       })
-      .catch(() => setError('Unable to add a todo'))
+      .catch(() => setError(ERRORS.ADD_TODO))
       .finally(() => {
         setTempTodo(null);
         setIsLoading(false);
@@ -95,7 +92,7 @@ export const App: React.FC = () => {
         setTodos(toDoState => toDoState.filter(todo => todo.id !== id));
       })
       .catch(() => {
-        setError('Unable to delete a todo');
+        setError(ERRORS.DELETE_TODO);
       })
       .finally(() => {
         setIsLoading(false);
@@ -108,8 +105,6 @@ export const App: React.FC = () => {
     onSuccess?: (res: Todo) => void,
     onFail?: () => void,
   ) => {
-    // setIsLoading(true);
-
     return updateToDo(id, updatedToDo)
       .then(res => {
         setTodos(state =>
@@ -123,7 +118,7 @@ export const App: React.FC = () => {
         }
       })
       .catch(() => {
-        setError('Unable to update a todo');
+        setError(ERRORS.UPDATE_TODO);
         if (onFail) {
           onFail();
         }
@@ -147,7 +142,7 @@ export const App: React.FC = () => {
           .then(() =>
             setTodos(prevTodos => prevTodos.filter(el => el.id !== todo.id)),
           )
-          .catch(() => setError('Unable to delete a todo')),
+          .catch(() => setError(ERRORS.DELETE_TODO)),
       );
     });
     Promise.all(promises).finally(() => setIsLoading(false));
